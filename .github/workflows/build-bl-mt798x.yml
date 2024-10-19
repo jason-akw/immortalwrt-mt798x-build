@@ -8,20 +8,40 @@ on:
   workflow_dispatch:
     # Inputs the workflow accepts.
     inputs:
-      nmbm:
-        # Friendly description to be shown in the UI instead of 'name'
-        description: 'nmbm enabled'
-        # Default value if no value is explicitly provided
+      NMBM:
+        description: 'Enable NMBM'
         default: true
-        # Input has to be provided for the workflow to run
         required: true
-        # The data type of the input
         type: boolean
+      BOARD:
+        description: 'BOARD'
+        default: '360t7'
+        required: true
+        type: choice
+        options:
+        - 360t7
+        - livinet_zr-3020
+        - cetron_ct3003
+        - jcg_q30
+        - konka_komi-a31
+        - wr30u
+        - imou_lc-hx3001
+        - clt_r30b1
+        - abt_asr3000
+        - cmcc_a10
+        - cmcc_rax3000m
+        - cmcc_rax3000m-emmc
+        - h3c_magic-nx30-pro
+        - ax3000t
+env:
+  REPO_URL: https://github.com/hanwckf/bl-mt798x.git
+  REPO_BRANCH: master
+  TZ: Asia/Shanghai
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "greet"
-  greet:
+  build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     if: ${{ inputs.nmbm }}
@@ -29,4 +49,4 @@ jobs:
     steps:
     # Runs a single command using the runners shell
     - name: Send greeting
-      run: echo "Hello nmbm"
+      run: echo "Hello nmbm ${{ BOARD }}"
