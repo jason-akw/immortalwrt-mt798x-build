@@ -49,4 +49,6 @@ jobs:
     steps:
     
     - name: Send greeting
-      run: [github.event.inputs.NMBM == 'true'] && echo "Hello nmbm ${{ github.event.inputs.BOARD }}"
+      run: |
+        echo ${{ github.event.inputs.NMBM }}
+        echo "Hello nmbm ${{ github.event.inputs.BOARD }}"
