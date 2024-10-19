@@ -1,6 +1,6 @@
 # This is a basic workflow that is manually triggered
 
-name: Build mt7981 uboot
+name: Build mt7981 uboot from hanwckf/bl-798x
 
 # Controls when the action will run. Workflow runs when manually triggered using the UI
 # or API.
