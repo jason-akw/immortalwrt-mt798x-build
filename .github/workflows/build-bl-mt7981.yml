@@ -77,7 +77,7 @@ jobs:
             df -hT $PWD
             git clone $REPO_URL -b $REPO_BRANCH u-boot
             ln -sf /srcdir/u-boot $GITHUB_WORKSPACE/u-boot      
-            echo "HEAD=_$(git ls-remote $REPO_URL HEAD | head -c7)" >> $GITHUB_ENV 
+            echo "REPO_HEAD=_$(git ls-remote $REPO_URL HEAD | head -c7)" >> $GITHUB_ENV 
 
     - name: Compile U-Boot Cycle
       id: compile
@@ -108,14 +108,14 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success' && !cancelled()
       with:
-        name: u-boot_bin_${{ github.event.inputs.BOARD }}${{ env.HEAD }}
+        name: u-boot_bin_${{ github.event.inputs.BOARD }}${{ env.REPO_HEAD }}
         path: u-boot/output
 
     - name: Generate release tag
       id: tag
       if: steps.compile.outputs.status == 'success' && !cancelled()
       run: |
-          echo "release_tag=U-Boot_${{ github.event.inputs.BOARD }}${{ env.HEAD }}" >> $GITHUB_OUTPUT
+          echo "release_tag=U-Boot_${{ github.event.inputs.BOARD }}${{ env.REPO_HEAD }}" >> $GITHUB_OUTPUT
           touch release.txt
           echo "IMPORTANT: Disable-NMBM may hardbrick your device. Don't try Disable-NMBM if you are not sure. 重要提示：Disable-NMBM 可能导致设备变砖。如不了解NMBM不要尝试Disable-NMBM 版本。" >> release.txt
           echo "status=success" >> $GITHUB_OUTPUT
