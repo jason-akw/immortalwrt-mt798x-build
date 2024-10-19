@@ -28,9 +28,9 @@ on:
         - cmcc_rax3000m-emmc
         - h3c_magic-nx30-pro
         - ax3000t
-      NMBM:
-        description: 'NMBM'
-        default: true
+      DISABLE-NMBM:
+        description: 'Build Disable-NMBM version and NMBM(Default) version'
+        default: false
         type: boolean
       
 env:
@@ -52,14 +52,8 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     
-    - name: Send greeting
-      run: |
-        echo ${{ github.event.inputs.NMBM }}
-        echo "Hello nmbm ${{ github.event.inputs.BOARD }}"
-
     - name: Checkout
       uses: actions/checkout@main
-        
 
     - name: Initialization environment
       env:
@@ -95,6 +89,15 @@ jobs:
             SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} FIXED_MTDPARTS=1 ./build.sh
           else
             SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} FIXED_MTDPARTS=1 ./build.sh
+          fi
+          if [ ${{ github.event.inputs.DISABLE-NMBM }} == 'true' ]
+            if grep -q '${FIP_NAME}.bin' build.sh
+            then
+              sed -i 's/${FIP_NAME}.bin/${FIP_NAME}_Disable-NMBM.bin/g' build.sh
+              sed -i '/CONFIG_ENABLE_NAND_NMBM/s/^/#/g' ./configs/mt7981_${{ github.event.inputs.BOARD }}_defconfig
+              sed -i '/CONFIG_CMD_NMBM/s/^/#/g' ./configs/mt7981_${{ github.event.inputs.BOARD }}_defconfig
+              SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} FIXED_MTDPARTS=1 ./build.sh
+            fi
           fi
           echo "status=success" >> $GITHUB_OUTPUT
 
