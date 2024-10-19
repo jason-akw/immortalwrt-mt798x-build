@@ -56,8 +56,8 @@ jobs:
       uses: actions/checkout@main
 
     - name: Initialization environment
-      env:
-          DEBIAN_FRONTEND: noninteractive
+      #env:
+          #DEBIAN_FRONTEND: noninteractive
       run: |
 
           sudo -E apt-get -qq install gcc-aarch64-linux-gnu build-essential flex bison libssl-dev device-tree-compiler
@@ -91,6 +91,7 @@ jobs:
             SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} FIXED_MTDPARTS=1 ./build.sh
           fi
           if [ ${{ github.event.inputs.DISABLE-NMBM }} == 'true' ]
+          then
             if grep -q '${FIP_NAME}.bin' build.sh
             then
               sed -i 's/${FIP_NAME}.bin/${FIP_NAME}_Disable-NMBM.bin/g' build.sh
