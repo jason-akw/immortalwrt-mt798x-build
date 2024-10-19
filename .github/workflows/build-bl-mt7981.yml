@@ -8,11 +8,6 @@ on:
   workflow_dispatch:
     # Inputs the workflow accepts.
     inputs:
-      NMBM:
-        description: 'Enable NMBM'
-        default: true
-        required: true
-        type: boolean
       BOARD:
         description: 'BOARD'
         default: '360t7'
@@ -33,6 +28,11 @@ on:
         - cmcc_rax3000m-emmc
         - h3c_magic-nx30-pro
         - ax3000t
+      NMBM:
+        description: 'Enable NMBM'
+        default: true
+        required: true
+        type: boolean
 env:
   REPO_URL: https://github.com/hanwckf/bl-mt798x.git
   REPO_BRANCH: master
@@ -47,6 +47,6 @@ jobs:
     if: ${{ inputs.nmbm }}
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Runs a single command using the runners shell
+    
     - name: Send greeting
-      run: echo "Hello nmbm ${{ github.event.inputs.BOARD }}"
+      run: [github.event.inputs.NMBM == 'true'] && echo "Hello nmbm ${{ github.event.inputs.BOARD }}"
