@@ -52,13 +52,14 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     
-    - name: Send greeting
-      run: |
-        echo ${{ github.event.inputs.NMBM }}
-        echo "Hello nmbm ${{ github.event.inputs.BOARD }}"
+    #- name: Send greeting
+     # run: |
+      #  echo ${{ github.event.inputs.NMBM }}
+       # echo "Hello nmbm ${{ github.event.inputs.BOARD }}"
 
-    - name: Checkout
-        uses: actions/checkout@main
+    #- name: Checkout
+     #   uses: actions/checkout@main
+        
 
     - name: Initialization environment
         env:
