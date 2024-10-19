@@ -29,7 +29,7 @@ on:
         - h3c_magic-nx30-pro
         - ax3000t
       DISABLE-NMBM:
-        description: 'Build Disable-NMBM version and NMBM(Default) version. IMPORTANT: Disable-NMBM version may hardbrick your device. 重要提示：Disable-NMBM 版本可能导致设备变砖。'
+        description: 'Build Disable-NMBM and NMBM(Default). IMPORTANT: Disable-NMBM may hardbrick your device. Dont try Disable-NMBM if you are not sure. 重要提示：Disable-NMBM 可能导致设备变砖。如不了解NMBM不要尝试Disable-NMBM 版本。'
         default: false
         type: boolean
       
@@ -117,7 +117,7 @@ jobs:
       run: |
           echo "release_tag=U-Boot_${{ github.event.inputs.BOARD }}${{ env.HEAD }}" >> $GITHUB_OUTPUT
           touch release.txt
-          echo "IMPORTANT: Disable-NMBM version may hardbrick your device. 重要提示：Disable-NMBM 版本可能导致设备变砖。" >> release.txt
+          echo "IMPORTANT: Disable-NMBM may hardbrick your device. Don't try Disable-NMBM if you are not sure. 重要提示：Disable-NMBM 可能导致设备变砖。如不了解NMBM不要尝试Disable-NMBM 版本。" >> release.txt
           echo "status=success" >> $GITHUB_OUTPUT
 
     - name: Upload firmware to release
