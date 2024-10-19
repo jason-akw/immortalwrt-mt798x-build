@@ -92,11 +92,12 @@ jobs:
           fi
           if [ ${{ github.event.inputs.DISABLE-NMBM }} == 'true' ]
           then
-            if grep -q '${FIP_NAME}.bin' build.sh
+            if grep -q '${FIP_NAME}.bin' ./build.sh
             then
-              sed -i 's/${FIP_NAME}.bin/${FIP_NAME}_Disable-NMBM.bin/g' build.sh
-              sed -i '/CONFIG_ENABLE_NAND_NMBM/s/^/#/g' ./configs/mt7981_${{ github.event.inputs.BOARD }}_defconfig
-              sed -i '/CONFIG_CMD_NMBM/s/^/#/g' ./configs/mt7981_${{ github.event.inputs.BOARD }}_defconfig
+              sed -i 's/${FIP_NAME}.bin/${FIP_NAME}_Disable-NMBM.bin/g' ./build.sh
+              eval $(grep ^UBOOT_DIR= ./build.sh)
+              sed -i '/CONFIG_ENABLE_NAND_NMBM/s/^/#/g' ./${UBOOT_DIR}/configs/mt7981_${{ github.event.inputs.BOARD }}_defconfig
+              sed -i '/CONFIG_CMD_NMBM/s/^/#/g' ./${UBOOT_DIR}/configs/mt7981_${{ github.event.inputs.BOARD }}_defconfig
               SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} FIXED_MTDPARTS=1 ./build.sh
             fi
           fi
