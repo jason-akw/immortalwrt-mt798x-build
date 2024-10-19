@@ -117,8 +117,7 @@ jobs:
       run: |
           echo "release_tag=U-Boot_${{ github.event.inputs.BOARD }}${{ env.HEAD }}" >> $GITHUB_OUTPUT
           touch release.txt
-          echo "IMPORTANT: Disable-NMBM version may hardbrick your device. " >> release.txt
-          echo "重要提示：Disable-NMBM 版本可能导致设备变砖。" >> relesae.txt
+          echo "IMPORTANT: Disable-NMBM version may hardbrick your device. 重要提示：Disable-NMBM 版本可能导致设备变砖。" >> release.txt
           echo "status=success" >> $GITHUB_OUTPUT
 
     - name: Upload firmware to release
