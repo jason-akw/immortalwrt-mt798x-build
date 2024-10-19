@@ -1,0 +1,138 @@
+name: Build mt7981 firmware from hanwckf/immortalwrt-798x
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  workflow_dispatch:
+    # Inputs the workflow accepts.
+    inputs:
+      BOARD:
+        description: 'BOARD'
+        default: '360t7'
+        required: true
+        type: choice
+        options:
+        - 360t7
+        - livinet_zr-3020
+        - cetron_ct3003
+        - jcg_q30
+        - konka_komi-a31
+        - wr30u
+        - imou_lc-hx3001
+        - clt_r30b1
+        - abt_asr3000
+        - cmcc_a10
+        - cmcc_rax3000m
+        - cmcc_rax3000m-emmc
+        - h3c_magic-nx30-pro
+        - ax3000t
+      DISABLE-NMBM:
+        description: 'Build Disable-NMBM and NMBM(Default). IMPORTANT: Disable-NMBM may hardbrick your device. Dont try Disable-NMBM if you are not sure. 重要提示：Disable-NMBM 可能导致设备变砖。如不了解NMBM不要尝试Disable-NMBM 版本。'
+        default: false
+        type: boolean
+      
+env:
+  REPO_URL: https://github.com/hanwckf/bl-mt798x.git
+  REPO_BRANCH: master
+  TZ: Asia/Shanghai
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "greet"
+  build:
+    
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      actions: write
+      
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    
+    - name: Checkout
+      uses: actions/checkout@main
+
+    - name: Initialization environment
+      #env:
+          #DEBIAN_FRONTEND: noninteractive
+      run: |
+
+          sudo -E apt-get -qq install gcc-aarch64-linux-gnu build-essential flex bison libssl-dev device-tree-compiler
+
+          sudo -E apt-get -qq autoremove --purge
+          sudo -E apt-get -qq clean
+
+          sudo timedatectl set-timezone "$TZ"
+          
+          sudo mkdir -p /srcdir
+          sudo chown $USER:$GROUPS /srcdir
+
+    - name: Clone Source Repository
+      working-directory: /srcdir
+      run: |
+           echo "Free space:"
+            df -hT $PWD
+            git clone $REPO_URL -b $REPO_BRANCH u-boot
+            ln -sf /srcdir/u-boot $GITHUB_WORKSPACE/u-boot      
+            echo "HEAD=_$(git ls-remote $REPO_URL HEAD | head -c7)" >> $GITHUB_ENV 
+
+    - name: Compile U-Boot Cycle
+      id: compile
+      run: |
+          cd u-boot
+          SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} FIXED_MTDPARTS=1 ./build.sh
+          [ ${{ github.event.inputs.BOARD }} == 'wr30u' ] && SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} MULTI_LAYOUT=1 FIXED_MTDPARTS=1 ./build.sh
+          if [ ${{ github.event.inputs.DISABLE-NMBM }} == 'true' ]
+          then
+            if grep -q '${FIP_NAME}.bin' ./build.sh
+            then
+              sed -i 's/${FIP_NAME}.bin/${FIP_NAME}_Disable-NMBM.bin/g' ./build.sh
+              eval $(grep ^UBOOT_DIR= ./build.sh)
+              sed -i '/CONFIG_ENABLE_NAND_NMBM/s/^/#/g' ./${UBOOT_DIR}/configs/mt7981_${{ github.event.inputs.BOARD }}_defconfig
+              sed -i '/CONFIG_CMD_NMBM/s/^/#/g' ./${UBOOT_DIR}/configs/mt7981_${{ github.event.inputs.BOARD }}_defconfig
+              SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} FIXED_MTDPARTS=1 ./build.sh
+              if [ ${{ github.event.inputs.BOARD }} == 'wr30u' ]
+              then
+              sed -i '/CONFIG_ENABLE_NAND_NMBM/s/^/#/g' ./${UBOOT_DIR}/configs/mt7981_${{ github.event.inputs.BOARD }}_multi_layout_defconfig
+              sed -i '/CONFIG_CMD_NMBM/s/^/#/g' ./${UBOOT_DIR}/configs/mt7981_${{ github.event.inputs.BOARD }}_multi_layout_defconfig
+              SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} MULTI_LAYOUT=1 FIXED_MTDPARTS=1 ./build.sh
+              fi
+            fi
+          fi
+          echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: Upload bin directory
+      uses: actions/upload-artifact@main
+      if: steps.compile.outputs.status == 'success' && !cancelled()
+      with:
+        name: u-boot_bin_${{ github.event.inputs.BOARD }}${{ env.HEAD }}
+        path: u-boot/output
+
+    - name: Generate release tag
+      id: tag
+      if: steps.compile.outputs.status == 'success' && !cancelled()
+      run: |
+          echo "release_tag=U-Boot_${{ github.event.inputs.BOARD }}${{ env.HEAD }}" >> $GITHUB_OUTPUT
+          touch release.txt
+          echo "IMPORTANT: Disable-NMBM may hardbrick your device. Don't try Disable-NMBM if you are not sure. 重要提示：Disable-NMBM 可能导致设备变砖。如不了解NMBM不要尝试Disable-NMBM 版本。" >> release.txt
+          echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: Upload firmware to release
+      id: release
+      uses: softprops/action-gh-release@v2
+      if: steps.tag.outputs.status == 'success' && !cancelled()
+      with:
+          tag_name: ${{ steps.tag.outputs.release_tag }}
+          body_path: release.txt
+          files: u-boot/output/*
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Delete workflow runs
+      uses: Mattraks/delete-workflow-runs@v2
+      with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 7
+          keep_minimum_runs: 3
