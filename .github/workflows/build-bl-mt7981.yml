@@ -52,10 +52,10 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     
-    #- name: Send greeting
-     # run: |
-      #  echo ${{ github.event.inputs.NMBM }}
-       # echo "Hello nmbm ${{ github.event.inputs.BOARD }}"
+    - name: Send greeting
+      run: |
+        echo ${{ github.event.inputs.NMBM }}
+        echo "Hello nmbm ${{ github.event.inputs.BOARD }}"
 
     - name: Checkout
       uses: actions/checkout@main
@@ -83,11 +83,13 @@ jobs:
             df -hT $PWD
             git clone $REPO_URL -b $REPO_BRANCH u-boot
             ln -sf /srcdir/u-boot $GITHUB_WORKSPACE/u-boot      
+            echo "HEAD=_$(git ls-remote $REPO_URL HEAD | head -c7)" >> $GITHUB_ENV 
 
     - name: Compile U-Boot Cycle
       id: compile
       run: |
-          cd u-boot && SOC=mt7981 BOARD=ax3000t MULTI_LAYOUT=1 FIXED_MTDPARTS=1 ./build.sh
+          #cd u-boot && SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} MULTI_LAYOUT=1 FIXED_MTDPARTS=1 ./build.sh
+          cd u-boot && SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} ./build.sh
 
           echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
           echo "status=success" >> $GITHUB_OUTPUT
@@ -96,16 +98,16 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success' && !cancelled()
       with:
-        name: u-boot_bin_${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        name: u-boot_bin_${{ github.event.inputs.BOARD }}${{ env.HEAD }}
         path: u-boot/output
 
     - name: Generate release tag
       id: tag
       if: steps.compile.outputs.status == 'success' && !cancelled()
       run: |
-          echo "release_tag=U-Boot_$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
+          echo "release_tag=U-Boot_${{ github.event.inputs.BOARD }}${{ env.HEAD }}" >> $GITHUB_OUTPUT
           touch release.txt
-          echo "U-Boot 🌝 xiaomi ax3000t" >> release.txt
+          echo "U-Boot ${{ github.event.inputs.BOARD }}${{ env.HEAD }}" >> release.txt
           echo "status=success" >> $GITHUB_OUTPUT
 
     - name: Upload firmware to release
