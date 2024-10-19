@@ -32,10 +32,6 @@ on:
         description: 'NMBM'
         default: true
         type: boolean
-      MULTI_LAYOUT:
-        description: 'MULTI_LAYOUT (support wr30u only)'
-        default: false
-        type: boolean
       
 env:
   REPO_URL: https://github.com/hanwckf/bl-mt798x.git
@@ -92,9 +88,10 @@ jobs:
     - name: Compile U-Boot Cycle
       id: compile
       run: |
-          if [ ${{ github.event.inputs.BOARD }} == 'wr30u' ] && [ ${{ github.event.input.MULTILAYOUT }} == 'true' ]
+          if [ ${{ github.event.inputs.BOARD }} == 'wr30u' ]
           then
             cd u-boot && SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} MULTI_LAYOUT=1 FIXED_MTDPARTS=1 ./build.sh
+            cd u-boot && SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} FIXED_MTDPARTS=1 ./build.sh
           else
             cd u-boot && SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} FIXED_MTDPARTS=1 ./build.sh
           fi
