@@ -93,10 +93,13 @@ jobs:
               eval $(grep ^UBOOT_DIR= ./build.sh)
               sed -i '/CONFIG_ENABLE_NAND_NMBM/s/^/#/g' ./${UBOOT_DIR}/configs/mt7981_${{ github.event.inputs.BOARD }}_defconfig
               sed -i '/CONFIG_CMD_NMBM/s/^/#/g' ./${UBOOT_DIR}/configs/mt7981_${{ github.event.inputs.BOARD }}_defconfig
+              SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} FIXED_MTDPARTS=1 ./build.sh
+              if [ ${{ github.event.inputs.BOARD }} == 'wr30u' ]
+              then
               sed -i '/CONFIG_ENABLE_NAND_NMBM/s/^/#/g' ./${UBOOT_DIR}/configs/mt7981_${{ github.event.inputs.BOARD }}_multi_layout_defconfig
               sed -i '/CONFIG_CMD_NMBM/s/^/#/g' ./${UBOOT_DIR}/configs/mt7981_${{ github.event.inputs.BOARD }}_multi_layout_defconfig
-              SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} FIXED_MTDPARTS=1 ./build.sh
-              [ ${{ github.event.inputs.BOARD }} == 'wr30u' ] && SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} MULTI_LAYOUT=1 FIXED_MTDPARTS=1 ./build.sh
+              SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} MULTI_LAYOUT=1 FIXED_MTDPARTS=1 ./build.sh
+              fi
             fi
           fi
           echo "status=success" >> $GITHUB_OUTPUT
