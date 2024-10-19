@@ -88,12 +88,13 @@ jobs:
     - name: Compile U-Boot Cycle
       id: compile
       run: |
+          cd u-boot
           if [ ${{ github.event.inputs.BOARD }} == 'wr30u' ]
           then
-            cd u-boot && SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} MULTI_LAYOUT=1 FIXED_MTDPARTS=1 ./build.sh
-            cd u-boot && SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} FIXED_MTDPARTS=1 ./build.sh
+            SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} MULTI_LAYOUT=1 FIXED_MTDPARTS=1 ./build.sh
+            SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} FIXED_MTDPARTS=1 ./build.sh
           else
-            cd u-boot && SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} FIXED_MTDPARTS=1 ./build.sh
+            SOC=mt7981 BOARD=${{ github.event.inputs.BOARD }} FIXED_MTDPARTS=1 ./build.sh
           fi
           echo "status=success" >> $GITHUB_OUTPUT
 
