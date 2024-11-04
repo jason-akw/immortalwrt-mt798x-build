@@ -1,4 +1,4 @@
-name: Build mt7981 firmware from hanwckf/immortalwrt-798x+luci-app-mtk
+name: Build mt7981 firmware from hanwckf/immortalwrt-798x_luci-app-mtk
 
 # Controls when the action will run. Workflow runs when manually triggered using the UI
 # or API.
@@ -59,7 +59,7 @@ jobs:
     - name: Load custom config
       run: |
         cd openwrt
-        cp -f ./defconfig/mt7981-ax3000.config .config
+        cp -f /luci-app-mtk-deprecated/mt7981-ax3000.config .config
         
     - name: Download package
       id: package
@@ -86,7 +86,7 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success' && !cancelled()
       with:
-        name: ImmortalWrt_bin_${{ env.REPO_HEAD }}
+        name: ImmortalWrt_luci_app_mtk_bin_${{ env.REPO_HEAD }}
         path: openwrt/bin
 
     - name: Organize files
@@ -102,16 +102,16 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
-        name: ImmortalWrt_firmware_${{ env.REPO_HEAD }}
+        name: ImmortalWrt_luci_app_mtk_${{ env.REPO_HEAD }}
         path: ${{ env.FIRMWARE }}
         
     - name: Generate release tag
       id: tag
       if: steps.compile.outputs.status == 'success' && !cancelled()
       run: |
-        echo "release_tag=ImmortalWrt_${{ env.REPO_HEAD }}" >> $GITHUB_OUTPUT
+        echo "release_tag=ImmortalWrt_luci_app_mtk_${{ env.REPO_HEAD }}" >> $GITHUB_OUTPUT
         touch release.txt
-        echo "ImmortalWrt_${{ env.REPO_HEAD }}" >> release.txt
+        echo "ImmortalWrt_luci_app_mtk_${{ env.REPO_HEAD }}" >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: Upload firmware to release
