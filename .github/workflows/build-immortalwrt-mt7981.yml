@@ -59,7 +59,7 @@ jobs:
     - name: Load custom config
       run: |
         cd openwrt
-        cp -f ./defconfig/mt7981-ax3000.config .config
+        cp -f ./defconfig/mt7986-ax6000.config .config
         
     - name: Download package
       id: package
