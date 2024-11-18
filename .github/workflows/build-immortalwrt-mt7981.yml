@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
       
 env:
-  REPO_URL: https://github.com/hanwckf/immortalwrt-mt798x.git
+  REPO_URL: https://github.com/jason-akw/immortalwrt-mt798x.git
   REPO_BRANCH: openwrt-21.02
   TZ: Asia/Shanghai
   FEEDS_CONF: feeds.conf.default
